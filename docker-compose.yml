@@ -1,0 +1,56 @@
+services:
+  redis:
+    image: redis
+    networks:
+      - back-end
+
+  db: 
+    image: postgres
+    volumes:
+      - mydbvol:/var/lib/postgresql/data
+    environment:
+       POSTGRES_USER: postgres
+       POSTGRES_PASSWORD: postgres
+       POSTGRES_DB: votes
+    networks:
+      - back-end
+
+  cast:
+    build: ./cast-app
+    ports: 
+      - "8080:8000"
+    container_name: cast-app-container
+    depends_on: 
+      - redis
+    networks: 
+      - front-end
+      - back-end
+
+  output:
+    build: ./output-app
+    ports:
+      - "8081:8081"
+    container_name: output-result-container
+    depends_on: 
+      - db
+    command: >
+      sh -c "until nc -z db 5432; do echo waiting for db; sleep 1; done;
+             node app.js"
+    networks: 
+      - front-end
+      - back-end
+
+  worker:
+    build: ./worker
+    depends_on:
+      - redis
+      - db
+    networks:
+      - back-end
+
+networks:
+  front-end:
+  back-end:
+
+volumes:
+  mydbvol:
