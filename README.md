@@ -10,7 +10,7 @@
 ## To restart 
   - docker-compose up (same command because docker will cache everything up to date)
 
-## To delete docker volume storage and spin up containers from afresh
+## To delete docker volume storage and spin up containers afresh
   - docker compose down -v
   - docker system prune -af --volumes
 
